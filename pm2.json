@@ -1,0 +1,17 @@
+{
+  "name": "LinktTic_Back",
+  "script": "server.js",
+  "log_date_format": "YYYY-MM-DD HH:mm:ss.SSS",
+  "watch": "true",
+  "ignore_watch": ["node_modules"],
+  "log_file": "./logs/LKB.outerr.log",
+  "error_file": "./logs/LKB.err.log",
+  "out_file": "./logs/LKB.out.log",
+  "pid_file": "./logs/LKB.pid.log",
+  "env_production": {
+    "NODE_ENV": "production"
+  },
+  "env_qa": {
+    "NODE_ENV": "qa"
+  }
+}

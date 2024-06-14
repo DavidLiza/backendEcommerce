@@ -1,0 +1,48 @@
+.DS_Store
+*.log
+.idea
+coverage
+.nyc_output
+yarn.lock
+
+Thumbs.db
+tmp/
+temp/
+*.lcov
+lib
+dist
+
+#Documentos de integracion del Servicio
+Docs/
+/Docs/
+
+# Ignorar Variables de entorno 
+.env
+
+# Ignorar posibles archivos multimedia 
+*.png
+*.jpg
+*.jpeg
+*.pdf
+
+# Ignorar archivos de credenciales o configuracion 
+config/creds.json
+config/config.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directory
+node_modules
+package-lock.json

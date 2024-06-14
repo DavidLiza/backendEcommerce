@@ -1,0 +1,115 @@
+name: LinktTic Backend Pipeline CI/CD
+run-name: GitHubAction Initialization ${{ github.repository }}
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+#  tags:
+#    - 'v*.*.*'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' && contains(github.ref, 'main') }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run Concurrence Test
+        run: npm run test-concurrence # Do it with a testFile
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' && contains(github.ref, 'main') }}
+
+    steps:
+      # I would personally specify the Folder where to install or Pull the code.
+      # To avoid installation of __work folder on the server
+      # working-directory: ../../../../../opt/projectPath/[NAME_SERV]
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy new Version
+        run: |
+          pwd
+          echo "Deploying application..." 
+          pm2 restart YOUR_SERVICE
+
+  version:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' && contains(github.ref, 'main') }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Bump version and generate changelog
+        run: |
+          npx standard-version
+          git config --global user.name 'DavidLiza'
+          git config --global user.email 'davidlizarazovesga@hotmail.com'
+          git push --follow-tags origin main
+
+    # - name: Create GitHub Release
+    #   uses: softprops/action-gh-release@v1
+    #   with:
+    #     files: |
+    #       changelog.md
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  gitPull:
+    if: ${{ github.event_name != 'workflow_dispatch' && contains(github.ref, 'main') }}
+    runs-on: self-hosted
+    steps:
+      - name: Location
+        run: |
+          pwd
+
+  developTest:
+    if: ${{ contains(github.ref, 'develop') }}
+    runs-on: self-hosted
+    steps:
+      - name: Run Test Script
+        working-directory: ../../../../../opt/identicasa/[NAME_SERV]
+        run: |
+          pwd
+
+  testDispatch:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: self-hosted
+    steps:
+      - name: Run Test Dispatch Script
+        run: |
+          pwd

@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+module/__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# KEYS
+*.ppk
+
+# CONFIGURATION FILE
+config/config.json
+config/*.json
+config/*.env
+
+# MODELOS ENTRENADOS DE IA
+models/*
+!models/readme.md
+
+# Distribution / packaging
+.Python
+# build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# PyBuilder
+.pybuilder/
+target/
+*.ipynb
+__pycache__
+*/__pycache__
+
+# Logs
+logs/
