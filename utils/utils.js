@@ -11,15 +11,12 @@ function getHeaders(form) {
   return new Promise((resolve, reject) => {
     form.getLength((err, length) => {
       if (err) {
-        reject(err);
+        reject(err)
       }
-      let headers = Object.assign(
-        { "Content-Length": length },
-        form.getHeaders()
-      );
-      resolve(headers);
-    });
-  });
+      let headers = Object.assign({ 'Content-Length': length }, form.getHeaders())
+      resolve(headers)
+    })
+  })
 }
 
 function isNull(value) {
@@ -65,6 +62,7 @@ function checkInput(req, res, next) {
 
 function errorHandler(err, _req, res, _next) {
   const { status, name, ...data } = err
+  delete data?.status
   return res.status(status).send(data)
 }
 
@@ -79,4 +77,3 @@ module.exports = {
   checkInput,
   errorHandler
 }
-

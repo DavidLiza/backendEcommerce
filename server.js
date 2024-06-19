@@ -26,8 +26,8 @@ app.use(express.urlencoded({ limit: '500mb', extended: true }))
 app.use(cors())
 
 app.use('/', testRoute)
-app.use('/api/node/login', userRoute)
-app.use('/api/node/order', orderRoute)
+app.use('/user', userRoute)
+app.use('/order', orderRoute)
 
 // ***** HTTP SERVER *****
 const server = http.createServer(app).listen(config.server.http.port, () => {

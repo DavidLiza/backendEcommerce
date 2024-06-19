@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const User = require('../models/User')
+const Order = require('../models/orders')
 
 async function getAllBase() {
   try {
@@ -12,7 +12,7 @@ async function getAllBase() {
 
 async function getBase(search) {
   try {
-    return await User.find(search).lean() //The lean option tells Mongoose to skip hydrating the result documents. This makes queries faster and less memory intensive
+    return await Order.find(search).lean() //The lean option tells Mongoose to skip hydrating the result documents. This makes queries faster and less memory intensive
   } catch (error) {
     //console.error(error)
     return error
@@ -23,7 +23,7 @@ async function createUser(data) {
   try {
     //form1
     const { email, password, completeName } = data
-    let newUser = new User({
+    let newUser = new Order({
       email,
       password,
       completeName
@@ -42,7 +42,7 @@ async function createUser(data) {
 
 async function updateBase(search, data) {
   try {
-    let base = await User.findOneAndUpdate(
+    let base = await Order.findOneAndUpdate(
       search,
       data,
       { new: true } // true: return updated object
@@ -53,30 +53,9 @@ async function updateBase(search, data) {
   }
 }
 
-async function FindUserWithValidation(userEmail, userPassword) {
-  try {
-    const usr = await User.findOne({ email: userEmail }).lean()
-
-    if (usr) {
-      const passwordValidation = await User.schema.methods.comparePassword(userPassword, userEmail)
-      if (passwordValidation) {
-        return usr
-      } else {
-        return 2
-      }
-    } else {
-      return 3
-    }
-  } catch (error) {
-    console.error('FindUserWithValidation ERROR:' + error)
-    return 0
-  }
-}
-
 module.exports = {
   getAllBase,
   getBase,
   createUser,
-  updateBase,
-  FindUserWithValidation
+  updateBase
 }

@@ -29,6 +29,11 @@ class MongoDataBase:
                 if as_df:
                     return pd.DataFrame([x for x in self.client[collection_name].find()])
                 else:
+                    documents = []
+                    for doc in self.client[collection_name].find():
+                        doc['_id'] = str(doc['_id'])
+                        documents.append(doc)
+                    return documents
                     return [x for x in self.client[collection_name].find()]
         except Exception as e :
             print ("Error in get_collection : {} \nCollectionName: {}".format(e , collection_name) )

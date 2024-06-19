@@ -1,9 +1,6 @@
 const express = require('express')
 const { checkInput, errorHandler } = require('../utils/utils.js')
-// const moment = require('moment')
-
-var baseController = require('../controllers/baseController.js')
-
+var orderController = require('../controllers/orderController.js')
 const { query, body, oneOf, header } = require('express-validator')
 
 const router = express.Router()
@@ -17,7 +14,7 @@ process.on('uncaughtException', function (err) {
 // **************** ROUTES FUNCTIONS *****************
 async function servRoute(req, res, next) {
   try {
-    const result = await baseController.servTest(req)
+    const result = await orderController.servTest(req)
     return res.status(200).send(result)
   } catch (error) {
     return next(error)
