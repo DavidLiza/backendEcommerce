@@ -53,30 +53,9 @@ async function updateBase(search, data) {
   }
 }
 
-async function FindUserWithValidation(userEmail, userPassword) {
-  try {
-    const usr = await Order.findOne({ email: userEmail }).lean()
-
-    if (usr) {
-      const passwordValidation = await Order.schema.methods.comparePassword(userPassword, userEmail)
-      if (passwordValidation) {
-        return usr
-      } else {
-        return 2
-      }
-    } else {
-      return 3
-    }
-  } catch (error) {
-    console.error('FindUserWithValidation ERROR:' + error)
-    return 0
-  }
-}
-
 module.exports = {
   getAllBase,
   getBase,
   createUser,
-  updateBase,
-  FindUserWithValidation
+  updateBase
 }

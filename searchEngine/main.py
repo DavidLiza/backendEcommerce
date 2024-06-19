@@ -86,6 +86,10 @@ class BackEnd:
     
     def predict_home_recommender(self, data: dict):
 
+        DATA = self.DB_OBJ.get_collection("product", False)
+        return {"code": "LKT001" , "result": DATA } 
+    def dommy_predict_home_recommender(self, data: dict):
+
         TEST_DATA =[ {
               "id": "123456" ,
               "imageUrl" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPz9RlMyKdIlFhN11RXDnjl1Wj_bv0mRu6rw&s" ,
@@ -98,7 +102,8 @@ class BackEnd:
               "description": "This is the description Of Product B",
               "name" : "Producto B"
             }]
-        return TEST_DATA
+        return {"code": "LKT001" , "result": TEST_DATA } 
+    
 
 
 app = FastAPI()
@@ -135,19 +140,20 @@ class CustomResponseMiddleware(BaseHTTPMiddleware):
             raise HTTPException(status_code=500, detail="Simulated error")
 
 origins = [
-    "http://localhost:4200",  # Your frontend URL
+    "*"  # Your frontend URL
     # Add other allowed origins as needed
 ]
 
 app.add_middleware(
     CORSMiddleware,
+    # CustomResponseMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
 
-app.add_middleware(CustomResponseMiddleware)
+
 
 class userAtHome(BaseModel):
     session: str = Body(...,min_length=10, description="The session identifier is not valid"),

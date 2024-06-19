@@ -2,7 +2,7 @@ const express = require('express')
 const { checkInput, errorHandler } = require('../utils/utils.js')
 // const moment = require('moment')
 
-const userController = require('../controllers/baseController.js')
+const userController = require('../controllers/userController.js')
 const { query, body, oneOf, header } = require('express-validator')
 
 const router = express.Router()

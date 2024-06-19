@@ -14,5 +14,5 @@ const orderSchema = new mongoose.Schema(
   { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt', default: Date.now } }
 )
 
-var order = mongoose.model('orderSchema', orderSchema, 'orderSchema')
+var order = mongoose.model('Order', orderSchema, 'order')
 module.exports = order
