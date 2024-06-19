@@ -6,15 +6,8 @@ const SALT_WORK_FACTOR = 10
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true },
-    passwordEncrypted: { type: String, required: true },
+    password: { type: String, select: false, required: true },
     completeName: { type: String, required: true },
-    address: {
-      street: { type: String },
-      city: { type: String },
-      state: { type: String },
-      zip: { type: String }
-    },
-    cellphone: { type: String },
     orders: [{ type: Schema.Types.ObjectId, ref: 'Order' }],
     recommendations: [String],
     trustScore: { type: Number }
@@ -45,4 +38,5 @@ userSchema.methods.comparePassword = async function (candidatePassword, usr) {
   }
 }
 
-module.exports = mongoose.model('User', userSchema, 'user')
+var user = mongoose.model('User', userSchema, 'user')
+module.exports = user

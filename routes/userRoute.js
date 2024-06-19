@@ -14,27 +14,86 @@ process.on('uncaughtException', function (err) {
 })
 
 // **************** ROUTES FUNCTIONS *****************
-async function servRoute(req, res, next) {
+async function userLogin(req, res, next) {
   try {
-    const result = await userController.servTest(req)
+    const result = await userController.userLogin(req)
+    delete result.status
     return res.status(200).send(result)
   } catch (error) {
-    return next(error)
+    const status = error.status ? error.status : 500
+    delete error.status
+    return res.status(status).send(error)
+  }
+}
+
+async function userLogout(req, res, next) {
+  try {
+    const result = await userController.userLogout(req)
+    delete result.status
+    return res.status(200).send(result)
+  } catch (error) {
+    const status = error.status ? error.status : 500
+    delete error.status
+    return res.status(status).send(error)
+  }
+}
+
+async function userRegister(req, res, next) {
+  try {
+    const result = await userController.userRegister(req)
+    // delete result.status
+    return res.status(200).send(result)
+  } catch (error) {
+    const status = error.status ? error.status : 500
+    delete error.status
+    return res.status(status).send(error)
   }
 }
 
 // **************** ROUTES *****************
 
 router.post(
-  '/api/serv',
-  body('id').notEmpty().withMessage('Missing Parameter: id'),
-  body('id', 'Parameter: "id" should be a COLOMBIAN Identification Number')
-    .if(body('id').exists())
-    .isNumeric()
-    .isLength({ min: 5, max: 10 }),
+  '/login',
+  body('email').notEmpty().withMessage('Missing Parameter: email'),
+  body('email', 'Parameter email should be a valid email').if(body('email').exists()).isEmail(),
+
+  body('password').notEmpty().withMessage('Missing Parameter: password'),
+  body('password', 'Parameter password should be a valid password')
+    .if(body('password').exists())
+    .isLength({ min: 5, max: 20 }),
 
   checkInput,
-  servRoute,
+  userLogin,
+  errorHandler
+)
+
+router.post(
+  '/logout',
+  body('userId').notEmpty().withMessage('Missing Parameter: userId'),
+  body('userId', 'Parameter userId should be a valid userId').if(body('userId').exists()).isLength({ min: 5, max: 20 }),
+
+  checkInput,
+  userLogout,
+  errorHandler
+)
+
+router.post(
+  '/register',
+  body('email').notEmpty().withMessage('Missing Parameter: email'),
+  body('email', 'Parameter email should be a valid email').if(body('email').exists()).isEmail(),
+
+  body('password').notEmpty().withMessage('Missing Parameter: password'),
+  body('password', 'Parameter password should be a valid password')
+    .if(body('password').exists())
+    .isLength({ min: 5, max: 20 }),
+
+  body('completeName').notEmpty().withMessage('Missing Parameter: completeName'),
+  body('completeName', 'Parameter completeName should be a valid Name')
+    .if(body('completeName').exists())
+    .isLength({ min: 5, max: 50 }),
+
+  checkInput,
+  userRegister,
   errorHandler
 )
 

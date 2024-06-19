@@ -1,4 +1,4 @@
-#uvicorn fastApiService:app --host 0.0.0.0 --port 8000
+#uvicorn fastApiService:app --host 0.0.0.0 --port 8041
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -35,8 +35,12 @@ except Exception as e :
     sys.exit(0)
 
 try:
-    from fastapi import FastAPI, Body 
+    from fastapi import FastAPI, Body , Request, Response, HTTPException
+    from fastapi.responses import JSONResponse
+    from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel
+    import uvicorn
+    from starlette.middleware.base import BaseHTTPMiddleware
     # import joblib # This is for IA Models Integration 
 except Exception as e:
     print ("@@@ ERROR on Fast API|joblib Import: {} @@@".format(e))
@@ -81,11 +85,69 @@ class BackEnd:
         pass
     
     def predict_home_recommender(self, data: dict):
-        pass
+
+        TEST_DATA =[ {
+              "id": "123456" ,
+              "imageUrl" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPz9RlMyKdIlFhN11RXDnjl1Wj_bv0mRu6rw&s" ,
+              "description": "This is the description Of Product A",
+              "name" : "Producto A"
+            },
+            {
+              "id": "789012" ,
+              "imageUrl" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr8KaHxKE41sR2UKx9opvPepFhDFRdVL39TA&s" ,
+              "description": "This is the description Of Product B",
+              "name" : "Producto B"
+            }]
+        return TEST_DATA
 
 
 app = FastAPI()
 BE = BackEnd()
+
+class CustomResponseMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        try:
+            response = await call_next(request)
+            if response.status_code == 200 :
+                # Read and parse the response body
+                body = [section async for section in response.body_iterator]
+                original_response = json.loads(body[0])
+                modified_response = {
+                    "code": "LKT001",
+                    "result": original_response
+                }
+            else :
+                modified_response = {
+                    "code": "LKT003",
+                    "result": response.body()
+                }
+            
+            return JSONResponse(modified_response)
+        except Exception as e:
+            
+
+            modified_response = {
+                "code": "LKT004",
+                "result": "OK"
+            }
+            return JSONResponse(modified_response)
+            print ("@@@ ERROR on dispatch: {} @@@".format(e))
+            raise HTTPException(status_code=500, detail="Simulated error")
+
+origins = [
+    "http://localhost:4200",  # Your frontend URL
+    # Add other allowed origins as needed
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
+app.add_middleware(CustomResponseMiddleware)
 
 class userAtHome(BaseModel):
     session: str = Body(...,min_length=10, description="The session identifier is not valid"),
@@ -98,12 +160,19 @@ class userSearch(BaseModel):
     user: str = Body(...,min_length=10, description="The user identifier is not valid"),
 
 
-@app.post("/searchEngine")
-def search_engine(data: dict):
+@app.post("/home/searchEngine")
+async def search_engine(data: dict):
     predictions = BE.predict_search_engine(data)
     return predictions
 
-@app.post("/homeRecommender")
-def homme_recommender(data: userAtHome):
-    recommendation = BE.predict_home_recommender(data)
-    return recommendation
+@app.post("/home/homeRecommender")
+async def homme_recommender(data: userAtHome):
+    try :
+        recommendation = BE.predict_home_recommender(data)
+        return recommendation
+    except Exception as e :
+        print ("@@@ ERROR on predict_home_recommender: {} @@@".format(e))
+        raise HTTPException(status_code=400, detail="Simulated error")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8897)

@@ -1,87 +1,114 @@
 const CODES = require('../utils/codes')
-const config = require('../config/config.json')[process.env.NODE_ENV || 'development']
-const { requestCallRest } = require('../utils/requestCall')
-const { isError } = require('../utils/utils') // call util function if needed
+const { isError } = require('../utils/utils')
+const userCrudOperations = require('../database/functions/userOperations')
+// const config = require('../config/config.json')[process.env.NODE_ENV || 'development']
+// const { requestCallRest } = require('../utils/requestCall')
 
-const baseCRUD = require('../database/functions/userOperations')
-
-async function servTest(req) {
+async function userLogin(req) {
   try {
-    const { example1 } = req.body
-    const base = await baseCRUD.getBase({ example1 })
-    if (isError(base) && typeof error.errmsg === 'string' && error.errmsg.includes('E11000 duplicate key')) {
-      throw new Error(
-        {
-          ...CODES.KEC005, // unique error
-          error: 'duplicate key: ' + error.errmsg.substring(error.errmsg.search('{ ') + 2, error.errmsg.search(': "'))
-        },
-        401
-      )
-    }
-    if (base.length === 0) {
-      throw new Error(CODES.KEC006, 405)
-    }
-    //bussiness logic
-
-    //rest request
-    // response = await requestCallRest(config.service.url, config.service.endpoint, config.service.method, example1)
-
-    // xml request
-    // const modifiedXML = `
-    // 			<tem:param1>` + param1Var + `</tem:param1>
-    // 			<tem:param2>` + param2Var + `</tem:param2>
-    // 			<tem:param3>` + param3Var + </tem:param3>;
-    // //change basicXML content to get the complete xml
-    // const soapRequest = basicXML.replace("BODY_CONTENT_PLACEHOLDER", modifiedXML);
-    // const sendRequest = await services.sendSoapRequest(soapRequest, [[method]], [[url]])
-    // //parse the answer as a JSON
-    // let parsedData = await parseXmlString(sendRequest.body);
-    // if (sendRequest.statusCode === 500) {
-    // 		console.log(parsedData)
-    // 		return { ...codes.CCOMWS003, error: "Server returned error", status: 200 }
+    // Sessions Not implemented So ...
+    // let sessionReboked = await userCrudOperations.sessionController.RevokeSessionId(req.body)
+    // if (!sessionReboked) {
+    //   throw { ...CODES.LTT003, error: 'Session Not Found', status: 404 }
+    // } else if (sessionReboked.length == 0) {
+    //   throw { ...CODES.LTT003, error: 'Session Not Found', status: 404 }
+    // } else {
+    //   return { ...CODES.LTT001, result: { loggedOut: true }, status: 200 }
     // }
-    // //if data has CDATA
-    // const basicHeaderResponse = parsedData['soap:Envelope']['soap:Body'][0]['[[CDATA_Location]]'][0]
-    // //parse CDATA to JSON
-    // let parseResult = await parseXmlCDATAString(basicHeaderResponse);
-    // let response = {};
-    // response = parseResult;
 
-    return { ...CODES.KEC001, message: {} }
-  } catch (error) {
-    if (['axiosError'].includes(error.name)) {
-      // this is only an example
-      throw new Error(
-        {
-          ...CODES.KEC004, // unique error
-          error: err.message === undefined ? err : err.message
-        },
-        403
-      )
+    var userLogged = await userCrudOperations.FindUserWithValidation(req.body.email, req.body.password)
+    if (userLogged) {
+      switch (userLogged) {
+        case 0:
+          throw { ...CODES.LTT003, error: 'DB_ERROR - error getting user', status: 500 }
+        case 2:
+          throw { ...CODES.LTT003, error: 'Invalid password', status: 200 }
+        case 3:
+          throw { ...CODES.LTT003, error: 'User not found', status: 404 }
+        default:
+          // let newUser = JSON.parse(JSON.stringify(userLogged))
+          // let sessionId = undefined
+          // if (sessionExists.length <= 0) {
+          //   let sessionCreated = await sessionController.CreateSessionID(newUser)
+          //   if (!sessionCreated) {
+          //     return 'Unable to create session'
+          //   }
+          //   sessionId = sessionCreated._id
+          // }
+          const dataNeed = {
+            email: userLogged.email,
+            userId: userLogged._id
+          }
+          return { ...CODES.LTT001, result: { ...dataNeed }, status: 200 }
+      }
+    } else {
+      console.error('User not retunerd')
+      throw { ...CODES.LTT000, status: 500 }
     }
+  } catch (error) {
     console.error(error.message === undefined ? error : error.message)
-    throw new Error(CODES.KEC000, 500)
+    throw error
+  }
+}
+
+async function userLogout(req) {
+  try {
+    var userExists = await userCrudOperations.getBase(req.body.userId)
+    return { ...CODES.LTT001, result: { loggedOut: true }, status: 200 }
+
+    var userLogged = await userCrudOperations.FindUserWithValidation(req.body.email, req.body.password)
+    if (userLogged) {
+      switch (userLogged) {
+        case 0:
+          throw { ...CODES.LTT003, error: 'DB_ERROR - error getting user', status: 500 }
+        case 2:
+          throw { ...CODES.LTT003, error: 'Invalid password', status: 200 }
+        case 3:
+          throw { ...CODES.LTT003, error: 'User not found', status: 404 }
+        default:
+          let newUser = JSON.parse(JSON.stringify(userLogged))
+          // let sessionId = undefined
+          // if (sessionExists.length <= 0) {
+          //   let sessionCreated = await sessionController.CreateSessionID(newUser)
+          //   if (!sessionCreated) {
+          //     return 'Unable to create session'
+          //   }
+          //   sessionId = sessionCreated._id
+          // }
+          let dataNeed = {
+            email: newUser.email,
+            userId: newUser._id
+          }
+          return dataNeed
+      }
+    } else {
+      console.error('User not retunerd')
+      throw { ...CODES.LTT000, status: 500 }
+    }
+  } catch (error) {
+    console.error(error.message === undefined ? error : error.message)
+    throw error
+  }
+}
+
+async function userRegister(req) {
+  try {
+    var userCreated = await userCrudOperations.createUser(req.body)
+    if (userCreated?.userCreated) {
+      return { ...CODES.LTT001, result: { userCreated: true }, status: 200 }
+    } else {
+      throw {
+        ...CODES.LTT000,
+        error: userCreated?.errmsg ? userCreated.errmsg : 'Unkown Error',
+        status: userCreated?.errmsg ? 400 : 500
+      }
+    }
+  } catch (error) {
+    console.error(error.message === undefined ? error : error.message)
+    throw error
   }
 }
 
 // ***** LOCAL NEEDED FUNCTIONS ******
 
-// async function parseXmlString(xmlString) {
-// 	try {
-// 			const result = await xml2js.parseStringPromise(xmlString);
-// 			return result;
-// 	} catch (err) {
-// 			throw err;
-// 	}
-// }
-
-// async function parseXmlCDATAString(xmlString) {
-// 	try {
-// 			const result = await xml2js.parseStringPromise(xmlString, { explicitArray: false, explicitRoot: false, mergeAttrs: true });
-// 			return result;
-// 	} catch (err) {
-// 			throw err;
-// 	}
-// }
-
-module.exports = { servTest }
+module.exports = { userLogin, userLogout, userRegister }
